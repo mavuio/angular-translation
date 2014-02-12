@@ -24,7 +24,7 @@ class AngularTranslationServiceProvider extends ServiceProvider {
 	public function boot()
 	{
 
-     \Route::controller('/angular_translation', 'Werkzeugh\AngularTranslation\AngularTranslationController');
+     \Route::controller('/public_endpoints/angular_translation', 'Werkzeugh\AngularTranslation\AngularTranslationController');
 
 	}
 
