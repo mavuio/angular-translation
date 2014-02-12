@@ -1,7 +1,7 @@
 <?php namespace Werkzeugh\AngularTranslation;
 
 use  BaseController,Redirect, View, Input, Response;
-use L_DB as DB;
+use  Illuminate\Support\Facades\DB;
 
 
 class AngularTranslationController extends BaseController {
