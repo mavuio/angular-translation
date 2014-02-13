@@ -35,6 +35,89 @@ class AngularTranslationController extends BaseController {
     return $langs;
   }
 
+  public function getMissing()
+  {
+
+    $ret['status']='error';
+    $key=Input::get('key');
+    $lang=Input::get('lang');
+    if($lang && $key)
+    {
+     $trans=\Lang::get($key);
+
+      $ret['info']="missing $key ($lang)";
+
+     if($trans)
+     {
+        $ret['info'].="adding translation";
+        $ret['trans']=$trans;
+        $ret=array_replace_recursive($ret,$this->addValueToTranslationDatabase($key,$lang,$trans));
+     }
+    }
+
+     return Response::json($ret);
+ }
+
+  function getPartsForKey($key)
+  {
+    $ret=[];
+
+    $parts=explode('.',$key);
+
+    if(sizeof($parts)>0)
+      $ret['item']=trim(array_pop($parts));
+    if(sizeof($parts)>0)
+      $ret['group']=trim(array_pop($parts));
+    if(sizeof($parts)>0)
+      $ret['namespace']=trim(array_pop($parts));
+
+    if(!$ret['namespace'])
+      $ret['namespace']='*';
+
+    if($ret['group'])
+      return $ret;
+    else
+      return NULL;
+
+  }
+
+  function addValueToTranslationDatabase($key,$lang,$default_text)
+  {
+
+    $ret=[];
+    if($keyparts=$this->getPartsForKey($key))
+    {
+      $ret['keyparts']=$keyparts;
+      $langid=$this->getAvailableLanguages()[$lang]['id'];
+
+      $newEntry=Array(
+        'language_id'=>$langid,
+        'namespace'=>$keyparts['namespace'],
+        'group'=>$keyparts['group'],
+        'item'=>$keyparts['item'],
+        'text'=>$default_text,
+        'locked'=>false,
+        );
+
+      try
+      {
+        $this->languageEntryProvider->create($newEntry);
+        $ret['status']=$ok;
+      } catch(\Illuminate\Database\QueryException $e){
+        $ret['status']='error';
+        $ret['msg']=$e->getMessage();
+
+        return $ret;
+      }
+
+    }
+
+    return $ret;
+
+
+  }
+
+
   public function getJson()
   {
 
