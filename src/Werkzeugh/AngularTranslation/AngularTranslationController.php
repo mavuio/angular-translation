@@ -17,7 +17,7 @@ class AngularTranslationController extends BaseController {
   protected $languageProvider;
   protected $languageEntryProvider;
 
-   protected function setProviders($languageProvider, $languageEntryProvider)
+  protected function setProviders($languageProvider, $languageEntryProvider)
   {
     $this->languageProvider       = $languageProvider;
     $this->languageEntryProvider  = $languageEntryProvider;
@@ -45,106 +45,106 @@ class AngularTranslationController extends BaseController {
     {
      $trans=\Lang::get($key);
 
-      $ret['info']="missing $key ($lang)";
+     $ret['info']="missing $key ($lang)";
 
-     if($trans)
+     if($trans && $trans!=$key)
      {
-        $ret['info'].="adding translation";
-        $ret['trans']=$trans;
-        $ret=array_replace_recursive($ret,$this->addValueToTranslationDatabase($key,$lang,$trans));
-     }
+      $ret['info'].="adding translation";
+      $ret['trans']=$trans;
+      $ret=array_replace_recursive($ret,$this->addValueToTranslationDatabase($key,$lang,$trans));
     }
-
-     return Response::json($ret);
- }
-
-  function getPartsForKey($key)
-  {
-    $ret=[];
-
-    $parts=explode('.',$key);
-
-    if(sizeof($parts)>0)
-      $ret['item']=trim(array_pop($parts));
-    if(sizeof($parts)>0)
-      $ret['group']=trim(array_pop($parts));
-    if(sizeof($parts)>0)
-      $ret['namespace']=trim(array_pop($parts));
-
-    if(!$ret['namespace'])
-      $ret['namespace']='*';
-
-    if($ret['group'])
-      return $ret;
-    else
-      return NULL;
-
   }
 
-  function addValueToTranslationDatabase($key,$lang,$default_text)
-  {
+  return Response::json($ret);
+}
 
-    $ret=[];
-    if($keyparts=$this->getPartsForKey($key))
-    {
-      $ret['keyparts']=$keyparts;
-      $langid=$this->getAvailableLanguages()[$lang]['id'];
+function getPartsForKey($key)
+{
+  $ret=[];
 
-      $newEntry=Array(
-        'language_id'=>$langid,
-        'namespace'=>$keyparts['namespace'],
-        'group'=>$keyparts['group'],
-        'item'=>$keyparts['item'],
-        'text'=>$default_text,
-        'locked'=>false,
-        );
+  $parts=explode('.',$key);
 
-      try
-      {
-        $this->languageEntryProvider->create($newEntry);
-        $ret['status']=$ok;
-      } catch(\Illuminate\Database\QueryException $e){
-        $ret['status']='error';
-        $ret['msg']=$e->getMessage();
+  if(sizeof($parts)>0)
+    $ret['item']=trim(array_pop($parts));
+  if(sizeof($parts)>0)
+    $ret['group']=trim(array_pop($parts));
+  if(sizeof($parts)>0)
+    $ret['namespace']=trim(array_pop($parts));
 
-        return $ret;
-      }
+  if(!$ret['namespace'])
+    $ret['namespace']='*';
 
-    }
-
+  if($ret['group'])
     return $ret;
+  else
+    return NULL;
 
+}
+
+function addValueToTranslationDatabase($key,$lang,$default_text)
+{
+
+  $ret=[];
+  if($keyparts=$this->getPartsForKey($key))
+  {
+    $ret['keyparts']=$keyparts;
+    $langid=$this->getAvailableLanguages()[$lang]['id'];
+
+    $newEntry=Array(
+      'language_id'=>$langid,
+      'namespace'=>$keyparts['namespace'],
+      'group'=>$keyparts['group'],
+      'item'=>$keyparts['item'],
+      'text'=>$default_text,
+      'locked'=>false,
+      );
+
+    try
+    {
+      $this->languageEntryProvider->create($newEntry);
+      $ret['status']=$ok;
+    } catch(\Illuminate\Database\QueryException $e){
+      $ret['status']='error';
+      $ret['msg']=$e->getMessage();
+
+      return $ret;
+    }
 
   }
 
-
-  public function getJson()
-  {
-
-      $model = $this->languageEntryProvider->createModel();
+  return $ret;
 
 
-      $langid=$this->getAvailableLanguages()[Input::get('lang')]['id'];
+}
 
-      $query=DB::table($model->getTable());
-      $query->whereLanguageId($langid);
+
+public function getJson()
+{
+
+  $model = $this->languageEntryProvider->createModel();
+
+
+  $langid=$this->getAvailableLanguages()[Input::get('lang')]['id'];
+
+  $query=DB::table($model->getTable());
+  $query->whereLanguageId($langid);
 
       // $GLOBALS['debugsql']=1;
 
 
-        DB::connection()->setFetchMode(\PDO::FETCH_ASSOC);
+  DB::connection()->setFetchMode(\PDO::FETCH_ASSOC);
 
-      $res=$query->get(['namespace','group','item','text']);
+  $res=$query->get(['namespace','group','item','text']);
 
-      foreach ($res as $row) {
-        if($row['namespace']=="*")
-          $ret[$row['group']][$row['item']]=$row['text'];
-        else
-          $ret[$row['namespace']][$row['group']][$row['item']]=$row['text'];
-      }
-
-
-      return Response::json($ret);
-
+  foreach ($res as $row) {
+    if($row['namespace']=="*")
+      $ret[$row['group']][$row['item']]=$row['text'];
+    else
+      $ret[$row['namespace']][$row['group']][$row['item']]=$row['text'];
   }
+
+
+  return Response::json($ret);
+
+}
 }
