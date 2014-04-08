@@ -2,11 +2,9 @@
 
 use  BaseController,Redirect, View, Input, Response;
 use  Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
 
-
-class AngularTranslationController extends BaseController {
-
-
+class AngularTranslationController extends \BaseControllerForPackages {
 
 
   public function __construct(/*LanguageProvider $languageProvider, LanguageEntryProvider $languageEntryProvider*/)
@@ -38,15 +36,19 @@ class AngularTranslationController extends BaseController {
   public function getMissing()
   {
 
+    
+    //stop session race conditions:
+    Config::set('session.driver',null);
+      
     $ret['status']='error';
     $key=Input::get('key');
     $lang=Input::get('lang');
     if($lang && $key)
     {
      $trans=\Lang::get($key);
-
+  
      $ret['info']="missing $key ($lang)";
-
+  
      if($trans && $trans!=$key)
      {
       $ret['info'].="adding translation";
