@@ -18,13 +18,16 @@ class AngularTranslationServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-
-		$this->app->register('Waavi\Translation\TranslationServiceProvider');
+       $this->app->booting(function()
+       {
+    	   $this->app->register('Waavi\Translation\TranslationServiceProvider');
+       });
 
 	}
 
 	public function boot()
 	{
+
 
      \Route::controller('/public_endpoints/angular_translation', 'Werkzeugh\AngularTranslation\AngularTranslationController');
 
