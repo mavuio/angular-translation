@@ -18,10 +18,10 @@ class AngularTranslationServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-       $this->app->booting(function()
-       {
-    	   $this->app->register('Waavi\Translation\TranslationServiceProvider');
-       });
+       // $this->app->booting(function()
+       // {
+	   $this->app->register('Waavi\Translation\TranslationServiceProvider');
+       // });
 
 	}
 
