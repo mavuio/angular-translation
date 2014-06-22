@@ -36,29 +36,29 @@ class AngularTranslationController extends \BaseControllerForPackages {
   public function getMissing()
   {
 
-    
-    //stop session race conditions:
-    Config::set('session.driver',null);
-      
+
+//stop session race conditions:
+    Config::set('session.driver','array');
+
     $ret['status']='error';
     $key=Input::get('key');
     $lang=Input::get('lang');
     if($lang && $key)
     {
-     $trans=\Lang::get($key);
-  
-     $ret['info']="missing $key ($lang)";
-  
-     if($trans && $trans!=$key)
-     {
-      $ret['info'].="adding translation";
-      $ret['trans']=$trans;
-      $ret=array_replace_recursive($ret,$this->addValueToTranslationDatabase($key,$lang,$trans));
-    }
-  }
+      $trans=\Lang::get($key);
 
-  return Response::json($ret);
-}
+      $ret['info']="missing $key ($lang)";
+
+      if($trans && $trans!=$key)
+      {
+        $ret['info'].="adding translation";
+        $ret['trans']=$trans;
+        $ret=array_replace_recursive($ret,$this->addValueToTranslationDatabase($key,$lang,$trans));
+      }
+    }
+
+    return Response::json($ret);
+  }
 
 function getPartsForKey($key)
 {
