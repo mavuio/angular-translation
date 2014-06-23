@@ -36,9 +36,9 @@ class AngularTranslationController extends \BaseControllerForPackages {
   public function getMissing()
   {
 
+    Config::set('session.driver',null);
 
 //stop session race conditions:
-    Config::set('session.driver','array');
 
     $ret['status']='error';
     $key=Input::get('key');
