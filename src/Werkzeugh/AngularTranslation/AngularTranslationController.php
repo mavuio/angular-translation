@@ -136,13 +136,18 @@ public function getJson()
 
   DB::connection()->setFetchMode(\PDO::FETCH_ASSOC);
 
-  $res=$query->get(['namespace','group','item','text']);
+  $res=$query->whereNotIn('group',['longtexts'])->get(['namespace','group','item','text']);
 
   foreach ($res as $row) {
+    $text=$row['text'];
+    if (strstr($text,'#empty')) {
+      $text="";
+    }
     if($row['namespace']=="*")
-      $ret[$row['group']][$row['item']]=$row['text'];
+      $ret[$row['group']][$row['item']]=$text;
     else
-      $ret[$row['namespace']][$row['group']][$row['item']]=$row['text'];
+      $ret[$row['namespace']][$row['group']][$row['item']]=$text;
+
   }
 
 
